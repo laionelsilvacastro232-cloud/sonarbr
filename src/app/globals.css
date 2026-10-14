@@ -1,0 +1,303 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #000;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: #fff;
+  color: #000;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+a,
+button {
+  -webkit-touch-callout: none;
+}
+
+:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------- componentes ---------- */
+.btn-primary {
+  display: inline-flex;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: #fff;
+  padding: 0 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #000;
+  transition: transform 0.15s, opacity 0.15s, background 0.15s;
+}
+.btn-primary:hover {
+  transform: scale(1.03);
+  background: #e9e9e9;
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  transform: none;
+}
+.btn-outline {
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 0 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.btn-outline:hover {
+  border-color: #fff;
+  transform: scale(1.02);
+}
+.btn-outline:disabled {
+  opacity: 0.5;
+}
+.btn-danger {
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+}
+.btn-danger:hover {
+  background: #fff;
+  color: #000;
+}
+.icon-btn {
+  display: inline-grid;
+  height: 2.25rem;
+  width: 2.25rem;
+  place-items: center;
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 0.15s, background 0.15s;
+}
+.icon-btn:hover {
+  color: #fff;
+}
+.icon-btn:disabled {
+  opacity: 0.35;
+}
+.field {
+  width: 100%;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #181818;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.92rem;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field:focus {
+  border-color: #fff;
+}
+.field::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+.label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+}
+.panel {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: #141414;
+  padding: 1.25rem;
+}
+.chip {
+  display: inline-flex;
+  height: 2rem;
+  align-items: center;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.chip:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.chip[aria-pressed="true"],
+.chip[data-active="true"] {
+  background: #fff;
+  color: #000;
+}
+
+/* ---------- barra de progresso / volume ---------- */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  cursor: pointer;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #fff var(--pct, 0%), rgba(255, 255, 255, 0.22) var(--pct, 0%));
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  border-radius: 9999px;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.range:hover::-webkit-slider-thumb,
+.range:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+.range::-moz-range-thumb {
+  height: 12px;
+  width: 12px;
+  border: 0;
+  border-radius: 9999px;
+  background: #fff;
+}
+.range:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+@media (max-width: 767px) {
+  .range::-webkit-slider-thumb {
+    opacity: 1;
+  }
+}
+
+/* ---------- animações ---------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes eq {
+  0%,
+  100% {
+    height: 25%;
+  }
+  50% {
+    height: 100%;
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
+}
+.animate-rise {
+  animation: rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-fade {
+  animation: fade 0.25s ease-out;
+}
+.animate-drift {
+  animation: drift 14s ease-in-out infinite;
+}
+.eq-bar {
+  animation: eq 0.9s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+input[type="checkbox"] {
+  accent-color: #fff;
+  height: 1rem;
+  width: 1rem;
+}
+select.field {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.2rem;
+}
+table.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+table.tbl th {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+table.tbl td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: middle;
+}
