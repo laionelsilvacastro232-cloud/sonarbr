@@ -12,6 +12,7 @@ import { SETTING_DEFAULTS } from "@/lib/settings";
 import { importItunes } from "@/lib/bootstrap";
 import { safeUrl, saveUpload } from "@/lib/storage";
 import { appOrigin } from "@/lib/email";
+import { issueCode } from "@/lib/codes";
 
 export type AdminResult = { ok?: string; error?: string; link?: string } | undefined;
 const str = (f: FormData, k: string, max = 2000) => String(f.get(k) ?? "").trim().slice(0, max);
@@ -326,10 +327,9 @@ export async function approveArtist(userId: string): Promise<AdminResult> {
 export async function generateResetLink(userId: string): Promise<AdminResult> {
   return wrap(async () => {
     const admin = await actionAdmin();
-    const token = randomToken();
-    await db.insert(authTokens).values({ userId, kind: "reset", tokenHash: sha256(token), expiresAt: new Date(Date.now() + 3600_000) });
-    await audit(admin, "user.reset_link", userId);
-    return { ok: "Link gerado (válido por 1 hora). Envie-o ao usuário por um canal seguro.", link: `${await appOrigin()}/redefinir/${token}` };
+    const code = await issueCode(userId, "reset");
+    await audit(admin, "user.reset_code", userId);
+    return { ok: "Código gerado (válido por 15 minutos). Envie ao usuário por um canal seguro; ele usa em Esqueci minha senha.", link: `${await appOrigin()}/recuperar — código: ${code}` };
   });
 }
 

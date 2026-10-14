@@ -14,7 +14,8 @@ import {
   randomToken, rateLimit, sha256, verifyPassword,
 } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
-import { appOrigin, emailConfigured, sendEmail } from "@/lib/email";
+import { appOrigin, emailConfigured, sendCodeEmail, sendEmail } from "@/lib/email";
+import { consumeCode, issueCode } from "@/lib/codes";
 import { playlistAccess, isUuid, playlistTrackList, queryTracks } from "@/lib/queries";
 import { safeUrl, saveUpload } from "@/lib/storage";
 
@@ -58,16 +59,18 @@ export async function registerAction(_: FormState, f: FormData): Promise<FormSta
     .values({ email, username, displayName, passwordHash: hashPassword(password), role: isFirst ? "admin" : "user", artistRequest })
     .returning();
   if (isFirst) await audit(u, "admin.bootstrap", u.id);
-  await sendVerification(u.id, email);
   await createSession(u.id);
+  if (emailConfigured()) {
+    await sendVerification(u.id, email);
+    redirect(`/verificar-email?next=${artistRequest ? "/estudio" : "/"}`);
+  }
   redirect(artistRequest ? "/estudio" : "/");
 }
 
 async function sendVerification(userId: string, email: string) {
-  if (!emailConfigured()) return;
-  const token = randomToken();
-  await db.insert(authTokens).values({ userId, kind: "verify", tokenHash: sha256(token), expiresAt: new Date(Date.now() + 2 * 86400_000) });
-  await sendEmail(email, "Confirme seu e-mail", `Confirme seu e-mail acessando: ${await appOrigin()}/verificar/${token}`);
+  if (!emailConfigured()) return false;
+  const code = await issueCode(userId, "verify");
+  return sendCodeEmail(email, (await getSettings()).siteName, "verify", code);
 }
 
 export async function resendVerification(): Promise<R> {
@@ -75,12 +78,24 @@ export async function resendVerification(): Promise<R> {
     const u = await actionUser();
     if (u.emailVerifiedAt) return { ok: true };
     if (!emailConfigured()) throw new Error("O envio de e-mails ainda não foi configurado pelo administrador.");
-    if (!rateLimit(`ver:${u.id}`, 3, 3600_000)) throw new Error("Aguarde antes de reenviar.");
-    await sendVerification(u.id, u.email);
+    if (!rateLimit(`ver:${u.id}`, 5, 3600_000)) throw new Error("Aguarde alguns minutos antes de reenviar.");
+    if (!(await sendVerification(u.id, u.email))) throw new Error("Não foi possível enviar o e-mail agora. Tente novamente.");
     return { ok: true };
   } catch (e) {
     return fail(e);
   }
+}
+
+export async function verifyEmailCodeAction(_: FormState, f: FormData): Promise<FormState> {
+  const u = await getCurrentUser();
+  if (!u) redirect("/entrar");
+  const next = str(f, "next", 200);
+  const dest = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  if (u.emailVerifiedAt) redirect(dest);
+  const err = await consumeCode(u.id, "verify", str(f, "code", 20));
+  if (err) return { error: err };
+  await db.update(users).set({ emailVerifiedAt: new Date() }).where(eq(users.id, u.id));
+  redirect(dest);
 }
 
 export async function loginAction(_: FormState, f: FormData): Promise<FormState> {
@@ -95,7 +110,12 @@ export async function loginAction(_: FormState, f: FormData): Promise<FormState>
   if (u.status !== "active") return { error: `Conta suspensa${u.suspendedReason ? `: ${u.suspendedReason}` : "."}` };
   await createSession(u.id);
   const next = str(f, "next", 200);
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/");
+  const dest = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  if (!u.emailVerifiedAt && emailConfigured()) {
+    if (rateLimit(`ver:${u.id}`, 5, 3600_000)) await sendVerification(u.id, u.email);
+    redirect(`/verificar-email?next=${encodeURIComponent(dest)}`);
+  }
+  redirect(dest);
 }
 
 export async function logoutAction() {
@@ -105,29 +125,30 @@ export async function logoutAction() {
 
 export async function requestResetAction(_: FormState, f: FormData): Promise<FormState> {
   const email = str(f, "email", 200).toLowerCase();
-  if (!rateLimit(`reset:${await clientIp()}`, 5, 3600_000)) return { error: "Muitas solicitações. Tente mais tarde." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Informe um e-mail válido." };
+  if (!emailConfigured())
+    return { error: "O envio de e-mails ainda não foi configurado. Peça a um administrador para gerar um código de redefinição (Admin → Usuários)." };
+  if (!rateLimit(`reset:${await clientIp()}`, 10, 3600_000) || !rateLimit(`reset:${email}`, 5, 3600_000))
+    return { error: "Muitas solicitações. Tente novamente mais tarde." };
   const [u] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (u && u.status === "active" && emailConfigured()) {
-    const token = randomToken();
-    await db.insert(authTokens).values({ userId: u.id, kind: "reset", tokenHash: sha256(token), expiresAt: new Date(Date.now() + 3600_000) });
-    await sendEmail(email, "Redefinição de senha", `Redefina sua senha em até 1 hora: ${await appOrigin()}/redefinir/${token}`);
+  if (u && u.status === "active") {
+    const code = await issueCode(u.id, "reset");
+    await sendCodeEmail(email, (await getSettings()).siteName, "reset", code);
   }
-  return {
-    ok: emailConfigured()
-      ? "Se o e-mail existir, enviamos um link de redefinição válido por 1 hora."
-      : "O envio automático de e-mails não está configurado nesta instalação. Peça a um administrador para gerar seu link de redefinição (Admin → Usuários).",
-  };
+  return { ok: "Se existir uma conta com esse e-mail, enviamos um código de 6 dígitos. Ele vale por 15 minutos.", values: { email } };
 }
 
 export async function resetPasswordAction(_: FormState, f: FormData): Promise<FormState> {
-  const token = str(f, "token", 100);
+  const email = str(f, "email", 200).toLowerCase();
   const password = String(f.get("password") ?? "");
-  if (!isStrongPassword(password)) return { error: "A senha precisa ter 8+ caracteres, com letras e números." };
-  const [t] = await db.select().from(authTokens).where(and(eq(authTokens.tokenHash, sha256(token)), eq(authTokens.kind, "reset"))).limit(1);
-  if (!t || t.usedAt || t.expiresAt < new Date()) return { error: "Link inválido ou expirado. Solicite um novo." };
-  await db.update(users).set({ passwordHash: hashPassword(password) }).where(eq(users.id, t.userId));
-  await db.update(authTokens).set({ usedAt: new Date() }).where(eq(authTokens.id, t.id));
-  await db.delete(sessions).where(eq(sessions.userId, t.userId));
+  const keep = { values: { email } };
+  if (!isStrongPassword(password)) return { error: "A senha precisa ter 8+ caracteres, com letras e números.", ...keep };
+  const [u] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (!u) return { error: "Código incorreto ou expirado. Solicite um novo.", ...keep };
+  const err = await consumeCode(u.id, "reset", str(f, "code", 20));
+  if (err) return { error: err, ...keep };
+  await db.update(users).set({ passwordHash: hashPassword(password), emailVerifiedAt: u.emailVerifiedAt ?? new Date() }).where(eq(users.id, u.id));
+  await db.delete(sessions).where(eq(sessions.userId, u.id));
   redirect("/entrar?reset=1");
 }
 
