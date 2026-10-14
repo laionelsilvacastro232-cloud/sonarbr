@@ -150,9 +150,9 @@ export function VerifyEmailBox({ verified, configured }: { verified: boolean; co
     <div className="space-y-2">
       <p className="text-sm text-white/70">Seu e-mail ainda não foi verificado.</p>
       {configured ? (
-        <button disabled={busy} className="btn-outline" onClick={async () => { setBusy(true); const r = await resendVerification(); setBusy(false); r.ok ? ui.toast("E-mail de verificação enviado.") : ui.toast(r.error, "error"); }}>Reenviar e-mail de verificação</button>
+        <button disabled={busy} className="btn-outline" onClick={async () => { setBusy(true); const r = await resendVerification(); setBusy(false); if (r.ok) window.location.href = "/verificar-email?next=/configuracoes"; else ui.toast(r.error, "error"); }}>Enviar código de verificação</button>
       ) : (
-        <p className="text-xs text-white/45">O envio de e-mails não está configurado nesta instalação (defina RESEND_API_KEY e EMAIL_FROM).</p>
+        <p className="text-xs text-white/45">O envio de e-mails não está configurado nesta instalação (defina RESEND_API_KEY).</p>
       )}
     </div>
   );

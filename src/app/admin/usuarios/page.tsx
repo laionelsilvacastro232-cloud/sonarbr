@@ -43,7 +43,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                     <div className="flex flex-wrap items-start gap-2">
                       {(u.artistRequest || u.role === "user") && <ABtn run={approveArtist.bind(null, u.id)} label={u.artistRequest ? "Aprovar artista" : "Tornar artista"} />}
                       {u.role !== "admin" ? <ABtn run={setUserRole.bind(null, u.id, "admin")} label="Promover a admin" confirmText={`Dar acesso administrativo a ${u.email}?`} /> : <ABtn run={setUserRole.bind(null, u.id, "user")} label="Remover admin" confirmText="Remover acesso administrativo?" />}
-                      <ABtn run={generateResetLink.bind(null, u.id)} label="Link de senha" />
+                      <ABtn run={generateResetLink.bind(null, u.id)} label="Código de senha" />
                       {u.status === "active" ? <Reason label="Suspender" userId={u.id} /> : <ABtn run={reactivateUser.bind(null, u.id)} label="Reativar" />}
                     </div>
                   )}
