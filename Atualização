@@ -1,0 +1,167 @@
+PROJETO: SONAR BR — ATUALIZAÇÃO E CORREÇÃO COMPLETA
+
+Quero atualizar o projeto existente SONAR BR, que está conectado ao GitHub e hospedado na Vercel.
+
+IMPORTANTE:
+- Não crie outro aplicativo.
+- Não reconstrua o projeto do zero.
+- Não altere a identidade visual, o logotipo ou o layout atual sem necessidade.
+- Preserve as funcionalidades que já estão funcionando.
+- Analise o código existente antes de fazer alterações.
+- Identifique e corrija os bugs reais.
+- Não invente funcionalidades que não foram solicitadas.
+- Não remova dados, contas, músicas ou configurações existentes.
+- Mantenha a compatibilidade com o banco de dados atual.
+- Não exponha senhas, tokens ou variáveis de ambiente.
+
+1. PESQUISA E GÊNEROS MUSICAIS
+
+Corrija a lista de gêneros musicais apresentada na pesquisa.
+
+Remova palavras incorretas que não representam gêneros musicais, como "bolsa", e substitua-as por gêneros reais.
+
+Organize uma lista abrangente de gêneros e subgêneros, incluindo:
+Pop, Rock, Indie, R&B, Soul, Jazz, Blues, Hip-hop, Rap, Trap, Funk brasileiro, MPB, Samba, Pagode, Sertanejo, Forró, Bossa Nova, Reggae, Eletrônica, House, Techno, Disco, Gospel, Música Clássica, Country, Folk, Metal, Punk Rock, K-pop, J-pop, Lo-fi, Dream Pop, Alternativo, Reggaeton, Música Latina, Afrobeat, Amapiano e outros gêneros relevantes.
+
+Centralize a lista em uma única fonte de dados reutilizável.
+
+Garanta que os gêneros sejam utilizados corretamente na pesquisa, nos filtros, no cadastro de músicas, nos álbuns e nas recomendações.
+
+Evite duplicações e palavras aleatórias.
+
+2. PERSONALIZAÇÃO MUSICAL DOS OUVINTES
+
+Implemente uma etapa de seleção de gostos musicais para novos ouvintes.
+
+Após o cadastro, apresente uma tela com o título:
+"Que tipo de música combina com você?"
+
+Descrição:
+"Escolha seus gêneros favoritos para personalizarmos sua experiência no SONAR."
+
+Requisitos:
+- Permitir selecionar vários gêneros.
+- Utilizar o design e os componentes visuais já existentes.
+- Mostrar claramente os gêneros selecionados.
+- Criar um botão para continuar.
+- Permitir pular a etapa, se isso for compatível com o fluxo atual.
+- Salvar as preferências na conta do usuário.
+- Permitir editar as preferências posteriormente.
+- Evitar perguntar novamente a cada acesso.
+- Não criar contas duplicadas.
+- Respeitar as permissões e a autenticação existentes.
+
+Utilize as preferências para personalizar as recomendações de músicas, artistas e álbuns, considerando os dados realmente disponíveis no catálogo.
+
+Não apresente recomendações falsas ou músicas inexistentes.
+
+3. SAUDAÇÃO CONFORME O HORÁRIO
+
+Corrija a saudação exibida na página inicial.
+
+Utilize o horário local apropriado para determinar a mensagem:
+- Das 05h às 11h59: Bom dia.
+- Das 12h às 17h59: Boa tarde.
+- Das 18h às 04h59: Boa noite.
+
+A saudação deve ser calculada dinamicamente e não pode ficar fixa no código.
+
+Evite problemas de fuso horário e garanta que o horário seja atualizado corretamente.
+
+4. ENVIO DE MÚSICAS COMPLETAS PELOS ARTISTAS
+
+Atualize o fluxo de lançamento musical para permitir que artistas autorizados enviem arquivos de áudio completos.
+
+O formulário deve incluir:
+- Título da música.
+- Nome artístico.
+- Capa do lançamento.
+- Gênero musical.
+- Arquivo de áudio.
+- Informações adicionais já suportadas pelo sistema.
+
+Permita selecionar arquivos no dispositivo do usuário.
+
+Valide o formato, o tamanho e o tipo do arquivo no cliente e no servidor.
+
+Aceite MP3 e outros formatos somente quando houver suporte real para reprodução.
+
+Utilize um serviço apropriado para armazenar os arquivos de áudio. Não armazene os arquivos diretamente no GitHub nem os converta em strings gigantes no banco de dados.
+
+Antes de implementar:
+- Inspecione o banco de dados e as integrações existentes.
+- Identifique o serviço de armazenamento disponível.
+- Preserve as variáveis de ambiente.
+- Verifique os limites de tamanho dos arquivos.
+- Implemente o envio seguro e o tratamento de erros.
+- Proteja os arquivos e as permissões de acesso.
+
+Se não houver armazenamento adequado configurado, identifique o que falta e solicite a configuração necessária. Não invente credenciais nem simule um envio bem-sucedido.
+
+Após o envio, a música deve poder ser reproduzida integralmente, e não apenas por meio de uma prévia limitada.
+
+Implemente um player compatível com os arquivos hospedados, com reprodução, pausa, progresso e controle de volume, preservando o player visual existente sempre que possível.
+
+Garanta que os artistas tenham autorização para disponibilizar os arquivos enviados.
+
+5. ESTABILIDADE E CORREÇÃO DE BUGS
+
+Faça uma revisão técnica do projeto existente.
+
+Verifique:
+- Cadastro e login.
+- Sessões e autenticação.
+- Permissões de ouvintes, artistas e administradores.
+- Pesquisa e filtros.
+- Cadastro de músicas e álbuns.
+- Reprodução de áudio.
+- Salvamento das preferências.
+- Operações no banco de dados.
+- Carregamento das páginas.
+- Validação dos formulários.
+- Tratamento de erros.
+- Layout responsivo para celulares.
+- Segurança das rotas e APIs.
+- Possíveis erros de TypeScript e build.
+
+Corrija os problemas identificados sem remover funcionalidades que já funcionam.
+
+Não substitua o banco de dados nem altere o esquema sem avaliar a compatibilidade e preparar uma migração segura quando necessária.
+
+6. DESEMPENHO E MÚLTIPLOS USUÁRIOS
+
+Prepare o aplicativo para uso simultâneo por vários usuários.
+
+Evite:
+- Consultas desnecessárias ao banco de dados.
+- Duplicação de registros.
+- Requisições repetidas.
+- Vazamento de dados entre contas.
+- Exposição de informações privadas.
+- Operações sem validação no servidor.
+
+Utilize paginação quando apropriado e implemente tratamento de falhas de rede.
+
+Não declare que o sistema suporta uma quantidade específica de usuários sem testes que comprovem isso.
+
+7. TESTES E PUBLICAÇÃO
+
+Após as alterações:
+- Execute as verificações e os testes disponíveis.
+- Corrija os erros de build e TypeScript encontrados.
+- Verifique a compatibilidade com as dependências atuais.
+- Confirme que as funcionalidades existentes continuam funcionando.
+- Não exponha dados de usuários durante os testes.
+- Não publique alterações que apresentem erros críticos.
+
+Como o projeto já está conectado ao GitHub e à Vercel, preserve essa integração.
+
+Trabalhe em uma branch separada ou utilize o fluxo seguro de alterações já configurado. Não sobrescreva diretamente a versão de produção sem verificar as mudanças.
+
+RESULTADO ESPERADO:
+
+Um SONAR BR profissional, organizado, responsivo e funcional, com gêneros musicais corretos, personalização dos ouvintes, saudação conforme o horário, envio e reprodução integral de músicas e correção dos bugs identificados.
+
+Mantenha a identidade visual atual do SONAR BR.
+
+Antes de concluir, apresente um resumo das alterações realizadas, dos testes executados e de qualquer configuração externa que ainda seja necessária.
